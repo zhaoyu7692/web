@@ -1,0 +1,22 @@
+.oj-aside-guide {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 70px;
+  margin-top: -35px;
+  background: rgba(0,0,0,.05);
+  text-align: center;
+  line-height: 30px;
+  padding-top: 10px;
+  z-index: 100;
+  color: white;
+  font-size: 12px;
+}
+
+.oj-aside-guide:hover {
+  cursor: pointer;
+}
+
+.toast-z-index {
+  z-index: 3000 !important;
+}
