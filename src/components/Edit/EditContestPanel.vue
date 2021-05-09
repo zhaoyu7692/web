@@ -80,6 +80,8 @@
 </template>
 
 <script>
+import EventBus, {EventName} from "@/utils/EventBus";
+
 export default {
   name: "EditContestPanel",
   data() {
@@ -107,7 +109,7 @@ export default {
           status: 0,
         }],
       },
-      visible: true,
+      visible: false,
     }
   },
   methods: {
@@ -198,6 +200,9 @@ export default {
     }
   },
   created() {
+    EventBus.$on(EventName.ChangeEditContestVisible, (visible) => {
+      this.visible = visible
+    })
   },
 }
 </script>

@@ -33,7 +33,7 @@
                      style="padding-left: 25px">
         </ButtonPanel>
       </el-submenu>
-      <el-menu-item index="/submitStatus">
+      <el-menu-item index="/problemStatus">
         <i class="el-icon-s-data"></i>
         <span slot="title">提交状态</span>
       </el-menu-item>
@@ -53,13 +53,17 @@
                      style="padding-left: 25px">
         </ButtonPanel>
       </el-submenu>
-      <el-menu-item v-show="contestVisible" :index="'/submitStatus/' + contest.cid">
+      <el-menu-item v-show="contestVisible" index="/submitStatus">
         <i class="el-icon-menu"></i>
         <span slot="title">{{ contest.title + '提交状态' }}</span>
       </el-menu-item>
-      <el-menu-item v-show="contestVisible" :index="'/contestStatus/' + contest.cid">
+      <el-menu-item v-show="contestVisible" index="/contestStatus">
         <i class="el-icon-menu"></i>
         <span slot="title">{{ contest.title + '榜单' }}</span>
+      </el-menu-item>
+      <el-menu-item v-show="$store.state.user" @click="createContest">
+        <i class="el-icon-menu"></i>
+        <span>创建比赛</span>
       </el-menu-item>
       <el-menu-item index="/profile">
         <i class="el-icon-user-solid"></i>
@@ -76,7 +80,7 @@ import ButtonPanel from "@/components/ButtonPanel";
 export default {
   name: "Panel",
   components: {
-    ButtonPanel
+    ButtonPanel,
   },
   data() {
     return {
@@ -104,6 +108,9 @@ export default {
   },
   computed: {},
   methods: {
+    createContest() {
+      EventBus.$emit(EventName.ChangeEditContestVisible, true)
+    },
     contestButtonClicked(item) {
       console.log('/contest')
       this.curContestPid = item
@@ -130,6 +137,11 @@ export default {
       switch (this.currentTab) {
         case '/profile': {
           this.loginOrRegister()
+          break
+        }
+        case '/submitStatus':
+        case '/contestStatus': {
+          this.$router.push(this.currentTab + '/' + this.contest.cid)
           break
         }
         default: {
@@ -165,7 +177,11 @@ export default {
       }
     }
   },
-  watch: {},
+  watch: {
+    currentTab(old, news) {
+      console.log("current", old, news)
+    }
+  },
   created() {
     EventBus.$on(EventName.ChangeAsideVisible, visible => {
       this.asideShowed = visible

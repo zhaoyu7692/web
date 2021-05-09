@@ -79,7 +79,12 @@ export default {
       })
     },
     formatDuration(scope) {
-      return ('0' + (scope.row.duration / 3600).toString()).slice(-2) + ':' + ('0' + (scope.row.duration % 3600).toString()).slice(-2)
+      let duration = scope.row.duration
+      let formatDuration = ('0' + ((duration % (3600 * 24)) / 3600).toString()).slice(-2) + ':' + ('0' + (duration % 3600).toString()).slice(-2)
+      if (duration / (3600 * 24) > 0) {
+        formatDuration = Math.floor(duration / (3600 * 24)) + ':' + formatDuration
+      }
+      return formatDuration
     },
     contestStatus(scope) {
       // 根据当前时间判断比赛进行状态

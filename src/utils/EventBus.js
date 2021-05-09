@@ -6,7 +6,8 @@ export const EventName = {
   ChangeAsideVisible: 'ChangeAsideVisible',
   UpdateProblemIds: 'UpdateProblemIds',
   UpdateContest: 'UpdateContest',
-  UpdateContestPIds: 'UpdateContestPids',
+  UpdateContestPIds: 'UpdateContestPIds',
+  ChangeEditContestVisible: 'ChangeEditContestVisible',
 }
 
 export default new Vue();

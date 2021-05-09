@@ -31,7 +31,7 @@ const routes = [
     component: Problems,
   },
   {
-    path: '/submitStatus',
+    path: '/problemStatus',
     component: SubmitStatus,
   },
   {
