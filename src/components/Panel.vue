@@ -61,7 +61,11 @@
         <i class="el-icon-menu"></i>
         <span slot="title">{{ contest.title + '榜单' }}</span>
       </el-menu-item>
-      <el-menu-item v-show="$store.state.user" @click="createContest">
+      <el-menu-item v-show="$store.state.user" index="/createProblem">
+        <i class="el-icon-menu"></i>
+        <span>创建题目</span>
+      </el-menu-item>
+      <el-menu-item v-show="$store.state.user" index="/createContest">
         <i class="el-icon-menu"></i>
         <span>创建比赛</span>
       </el-menu-item>
@@ -94,6 +98,8 @@ export default {
         '/contest',
         '/contestStatus',
         '/profile',
+        '/createProblem',
+        '/createContest',
       ],
       problemIds: [],
       currentTab: '/index',
@@ -108,9 +114,6 @@ export default {
   },
   computed: {},
   methods: {
-    createContest() {
-      EventBus.$emit(EventName.ChangeEditContestVisible, true)
-    },
     contestButtonClicked(item) {
       console.log('/contest')
       this.curContestPid = item
@@ -137,6 +140,14 @@ export default {
       switch (this.currentTab) {
         case '/profile': {
           this.loginOrRegister()
+          break
+        }
+        case '/createProblem': {
+          EventBus.$emit(EventName.ChangeEditProblemVisible, true)
+          break
+        }
+        case '/createContest': {
+          EventBus.$emit(EventName.ChangeEditContestVisible, true)
           break
         }
         case '/submitStatus':

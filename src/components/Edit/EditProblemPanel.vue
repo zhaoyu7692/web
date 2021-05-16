@@ -3,35 +3,52 @@
       title=" 编辑题目"
       :visible.sync="visible"
       width="70%"
-      :before-close="a"
       model-value style="min-width: 1120px">
-    <el-form ref="form" label-width="80px">
-      <el-form-item label="题目标题">
-        <el-input v-model="title"></el-input>
+    <el-form ref="form" label-width="80px" :rules="rules" :model="problem">
+      <el-form-item label="题目标题" prop="title">
+        <el-input v-model="problem.title"></el-input>
       </el-form-item>
-      <el-form-item label="题目描述">
-        <el-input type="textarea" v-model="description"></el-input>
+      <el-form-item label="题目描述" prop="description">
+        <el-input type="textarea" v-model="problem.description"></el-input>
       </el-form-item>
-
-<!--      <el-form-item label="比赛时间">-->
-<!--        <el-date-picker v-model="start_time" type="datetime" placeholder="开始时间"></el-date-picker>-->
-<!--        &#45;&#45;&#45;&#45;&#45;&#45;-->
-<!--        <el-date-picker v-model="end_time" type="datetime" placeholder="结束时间"></el-date-picker>-->
-<!--      </el-form-item>-->
-      <el-form-item label="测试用例">
-        <!--        <el-select v-model="sad" placeholder="请选择活动区域">-->
-        <!--          <el-option label="区域一" value="shanghai"></el-option>-->
-        <!--          <el-option label="区域二" value="beijing"></el-option>-->
-        <!--        </el-select>-->
+      <el-form-item label="输入描述" prop="input">
+        <el-input type="textarea" v-model="problem.input"></el-input>
       </el-form-item>
-      <el-form-item label="评测用例">
+      <el-form-item label="输出描述" prop="output">
+        <el-input type="textarea" v-model="problem.output"></el-input>
+      </el-form-item>
+      <el-form-item label="测试用例" prop="samples">
+        <el-row style="padding-bottom: 10px" v-for="(sample, index) in problem.samples" :key="index" type="flex"
+                align="middle"
+                justify="center">
+          <el-col :span="11">
+            <el-input resize="none" type="textarea" placeholder="输入样例" v-model="sample.input"></el-input>
+          </el-col>
+          <el-col :span="11">
+            <el-input resize="none" type="textarea" placeholder="输出样例" v-model="sample.output"></el-input>
+          </el-col>
+          <el-col :span="2">
+            <el-button
+                @click="deleteSample(index)"
+                type="primary"
+                icon="el-icon-minus"
+                style="padding: 5px; display: block; margin: 0 auto"
+            ></el-button>
+          </el-col>
+        </el-row>
+        <el-button @click="addSample" type="primary" icon="el-icon-plus"
+                   style="width: 60px; margin: 0; padding: 5px"></el-button>
+      </el-form-item>
+      <el-form-item label="评测用例" prop="input_file_list">
         <el-row>
           <el-col :span="12">
             <el-upload
                 :on-change="inputFileChange"
                 action="/api/uploadTestCase/"
+                :before-upload="beforeUploadInput"
+                :on-success="uploadSuccess"
+                :on-error="uploadError"
                 multiple
-                :file-list="upload_input_file_list"
             >
               <el-button size="small" type="primary">点击选择输入文件</el-button>
               <div slot="tip" class="el-upload__tip">1.in - x.in</div>
@@ -41,10 +58,10 @@
             <el-upload
                 :on-change="outputFileChange"
                 action="/api/uploadTestCase/"
+                :before-upload="beforeUploadOutput"
+                :on-success="uploadSuccess"
+                :on-error="uploadError"
                 multiple
-                :auto-upload="false"
-                :file-list="upload_output_file_list"
-                http-request=""
                 ref="upload"
             >
               <el-button size="small" type="primary">点击选择输出文件</el-button>
@@ -53,22 +70,16 @@
           </el-col>
         </el-row>
       </el-form-item>
-      <el-form-item label="日常练习">
-        <el-col :span="1">
-          <el-switch v-model="practice"></el-switch>
-        </el-col>
-
-      </el-form-item>
-      <el-form-item label="时间限制">
-        <el-input type="number" v-model="time_limit" size="mini" style="width: 100px;"></el-input>
+      <el-form-item label="时间限制" prop="time_limit">
+        <el-input type="number" v-model="problem.time_limit" size="mini" style="width: 100px;"></el-input>
         MS
       </el-form-item>
-      <el-form-item label="空间限制">
-        <el-input type="number" v-model="memory_limit" size="mini" style="width: 100px;"></el-input>
+      <el-form-item label="空间限制" prop="memory_limit">
+        <el-input type="number" v-model="problem.memory_limit" size="mini" style="width: 100px;"></el-input>
         KB
       </el-form-item>
       <el-form-item label="题目难度">
-        <el-radio-group v-model="difficulty">
+        <el-radio-group v-model="problem.difficulty">
           <el-radio label="简单"></el-radio>
           <el-radio label="一般"></el-radio>
           <el-radio label="困难"></el-radio>
@@ -83,57 +94,236 @@
 </template>
 
 <script>
+import EventBus, {EventName} from "@/utils/EventBus";
+import {sha256} from 'js-sha256'
+
+const difficulty = ['简单', '一般', '困难']
 export default {
   name: "EditProblemPanel",
   data() {
+    const validateTitle = (rule, value, callback) => {
+      if (value === null || value.length === 0) {
+        callback(new Error("请输入题目标题"))
+        return
+      }
+      callback()
+    }
+    const validateDescription = (rule, value, callback) => {
+      if (value === null || value.length === 0) {
+        callback(new Error("请输入题目描述"))
+        return
+      }
+      callback()
+    }
+    const validateInput = (rule, value, callback) => {
+      if (value === null || value.length === 0) {
+        callback(new Error("请输入输入描述"))
+        return
+      }
+      callback()
+    }
+    const validateOutput = (rule, value, callback) => {
+      if (value === null || value.length === 0) {
+        callback(new Error("请输入输出描述"))
+        return
+      }
+      callback()
+    }
+    const validateSamples = (rule, value, callback) => {
+      for (let i = 0; i < value.length; i++) {
+        if (value[i].input === null || value[i].input === '' || value[i].output === '' || value[i].output === null) {
+          callback(new Error("测试样例不能为空"))
+          return
+        }
+      }
+      callback()
+    }
+    const validateTestCase = (rule, value, callback) => {
+      if (this.problem.input_file_list.length === 0 && this.problem.output_file_list.length === 0) {
+        callback(new Error("评测用例为空"))
+        return
+      }
+      if (this.problem.input_file_list.length !== this.problem.output_file_list.length) {
+        callback(new Error("评测用例输入输出不匹配"))
+        return
+      }
+      let inputFilenames = Array(), outputFilenames = Array()
+      for (let i = 0; i < this.problem.input_file_list.length; i++) {
+        inputFilenames.push(this.problem.input_file_list[i].name.substring(0, this.problem.input_file_list[i].name.lastIndexOf('.in')))
+      }
+      for (let i = 0; i < this.problem.output_file_list.length; i++) {
+        outputFilenames.push(this.problem.output_file_list[i].name.substring(0, this.problem.output_file_list[i].name.lastIndexOf('.out')))
+      }
+      console.log(inputFilenames, outputFilenames)
+      for (let i = 0; i < inputFilenames.length; i++) {
+        if (outputFilenames.indexOf(inputFilenames[i]) < 0) {
+          callback(new Error("评测用例输入输出不匹配"))
+          return
+        }
+      }
+      callback()
+    }
+    const validateTimeLimit = (rule, value, callback) => {
+      if (value <= 0) {
+        callback(new Error("时间限制需要大于0ms~"))
+        return
+      }
+      callback()
+    }
+    const validateMemoryLimit = (rule, value, callback) => {
+      if (value <= 0) {
+        callback(new Error("空间限制需要大于0KB~"))
+        return
+      }
+      callback()
+    }
     return {
       visible: true,
-      title: '',
-      description: '',
-      start_time: '',
-      end_time: '',
-      input_file_list: [],
-      output_file_list: [],
-      upload_input_file_list: [],
-      upload_output_file_list: [],
-      practice: false,
-      time_limit: 1000,
-      memory_limit: 65536,
-      difficulty: '简单',
+      problem: {
+        title: '',
+        description: '',
+        input: '',
+        output: '',
+        samples: [{
+          input: '',
+          output: '',
+        }],
+        input_file_list: [],
+        output_file_list: [],
+        time_limit: 1000,
+        memory_limit: 65536,
+        difficulty: '简单',
+      },
+      rules: {
+        title: [{validator: validateTitle, trigger: 'blur'}],
+        description: [{validator: validateDescription, trigger: 'blur'}],
+        input: [{validator: validateInput, trigger: 'blur'}],
+        output: [{validator: validateOutput, trigger: 'blur'}],
+        samples: [{validator: validateSamples, trigger: 'blur'}],
+        input_file_list: [{validator: validateTestCase, trigger: 'blur'}],
+        time_limit: [{validator: validateTimeLimit, trigger: 'change'}],
+        memory_limit: [{validator: validateMemoryLimit, trigger: 'change'}],
+      }
     }
   },
-  watch: {
-    output(newValue, oldValue) {
-      console.log(newValue, oldValue)
-    }
-  }
-  ,
   methods: {
+    addSample() {
+      this.problem.samples.push({
+        input: '',
+        output: '',
+      })
+    },
+    deleteSample(index) {
+      this.samples.splice(index, 1)
+    },
+    beforeUploadInput(file) {
+      for (let i = 0; i < this.problem.input_file_list.length - 1; i++) {
+        if (this.problem.input_file_list[i].name === file.name) {
+          this.$message({type: 'error', message: file.name + '已经上传过了~'})
+          return false
+        }
+      }
+      if (!file.name.endsWith(".in")) {
+        this.$message({type: 'error', message: file.name + '文件拓展名不是 .in ~'})
+        return false
+      }
+      return true
+    },
+    beforeUploadOutput(file) {
+      for (let i = 0; i < this.problem.output_file_list.length - 1; i++) {
+        if (this.problem.output_file_list[i].name === file.name) {
+          this.$message({type: 'error', message: file.name + '已经上传过了~'})
+          return false
+        }
+      }
+      if (!file.name.endsWith(".out")) {
+        this.$message({type: 'error', message: file.name + '文件拓展名不是 .out ~'})
+        return false
+      }
+      return true
+    },
+    uploadSuccess(response, file) {
+      this.$message({type: 'success', message: file.name + "上传成功!"})
+    },
+    uploadError(error, file) {
+      this.$message({type: 'error', message: file.name + "上传失败!"})
+    },
     inputFileChange(file, fileList) {
-      this.input_file_list = fileList;
+      this.problem.input_file_list = fileList;
     },
     outputFileChange(file, fileList) {
-      this.output_file_list = fileList
+      this.problem.output_file_list = fileList
+    },
+    Submit(data) {
+      this.$http.post('/createProblem/', data)
+          .then(({pid}) => {
+            this.visible = false
+            this.$message({type: 'error', message: '题目创建成功，题目编号 ' + pid})
+          })
+          .catch(errorCode => {
+            if (errorCode !== -1) {
+              this.$message({type: 'error', message: '题目创建失败'})
+            }
+          })
     },
     onSubmit() {
-      console.log('submit!');
-      this.$refs.upload.submit()
+      this.$refs.form.validate((valid) => {
+        if (!valid) {
+          return
+        }
+        let formData = this.problem
+        let data = {
+          title: formData.title,
+          description: formData.description,
+          input: formData.input,
+          output: formData.output,
+          samples: formData.samples,
+          filename_list: [],
+          time_limit: parseInt(formData.time_limit),
+          memory_limit: parseInt(formData.memory_limit),
+          difficulty: difficulty.indexOf(formData.difficulty),
+        }
+
+        let totalCount = 0
+        this.problem.input_file_list.forEach(value => {
+          totalCount++
+          this.$message({type: 'info', message: '正在计算' + value.name + '的 hash 值'})
+          let reader = new FileReader();
+          reader.readAsBinaryString(value.raw);
+          reader.onload = () => {
+            data.filename_list.push(sha256(reader.result))
+            this.$message({type: 'success', message: value.name + '的 hash 值计算完成'})
+            if (data.filename_list.length === totalCount) {
+              console.log('submit now')
+              console.log(data)
+              this.Submit(data)
+            }
+          };
+        })
+
+        this.problem.output_file_list.forEach(value => {
+          totalCount++
+          this.$message({type: 'info', message: '正在计算' + value.name + '的 hash 值'})
+          let reader = new FileReader();
+          reader.readAsBinaryString(value.raw);
+          reader.onload = () => {
+            data.filename_list.push(sha256(reader.result))
+            this.$message({type: 'success', message: value.name + '的 hash 值计算完成'})
+            if (data.filename_list.length === totalCount) {
+              console.log('submit now')
+              console.log(data)
+              this.Submit(data)
+            }
+          };
+        })
+      })
+
     },
-    // beforeUpload() {
-    //
-    // }
-    // xx() {
-    //   console.log(this.input_file_list)
-    //   console.log(this.output)
-    //   setTimeout(()=> {
-    //     this.xx()
-    //   }, 1000)
-    // }
   },
   created() {
-    // setTimeout(()=>{
-    // this.xx()
-    // }, 1000)
+    EventBus.$on(EventName.ChangeEditProblemVisible, (visible) => {
+      this.visible = visible
+    })
   }
 }
 </script>

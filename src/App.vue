@@ -1,12 +1,13 @@
 <template>
   <div id="app" style="height: 100%; box-sizing: border-box; padding: 0 0 0">
-<!--    <NavBar class="oj-header"></NavBar>-->
+    <!--    <NavBar class="oj-header"></NavBar>-->
     <Main class="oj-container"></Main>
     <Login></Login>
     <Register></Register>
-<!--    <EditProblemPanel>-->
+    <!--    <EditProblemPanel>-->
 
-<!--    </EditProblemPanel>-->
+    <!--    </EditProblemPanel>-->
+    <EditProblemPanel></EditProblemPanel>
     <EditContestPanel></EditContestPanel>
 
   </div>
@@ -18,12 +19,14 @@ import Main from '@/components/Main'
 import EventBus from "@/utils/EventBus"
 import Login from '@/components/Login'
 import Register from "@/components/Register";
-// import EditProblemPanel from "@/components/Edit/EditProblemPanel";
+import EditProblemPanel from "@/components/Edit/EditProblemPanel";
 import EditContestPanel from "@/components/Edit/EditContestPanel";
+
 export default {
   name: 'App',
   components: {
     EditContestPanel,
+    EditProblemPanel,
     Main,
     Login,
     Register,
@@ -45,9 +48,7 @@ export default {
       EventBus.$emit('changeAsideShowed', visible)
     },
   },
-  computed: {
-
-  },
+  computed: {},
   created() {
     EventBus.$on('changeAsideShowed', visible => {
       this.asideShowed = visible
@@ -68,8 +69,7 @@ export default {
   transition: margin-left .5s;
 }
 
-html, body
-{
+html, body {
   width: 100%;
   height: 100%;
   margin: 0;
