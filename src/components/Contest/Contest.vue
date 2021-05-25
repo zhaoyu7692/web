@@ -1,7 +1,7 @@
 <template>
   <el-main style="width: 90%; margin: 0 auto;">
     <el-table :data="problems" stripe>;
-      <el-table-column prop="pid" label="#" min-width="60"></el-table-column>
+      <el-table-column prop="index" label="#" min-width="60"></el-table-column>
       <el-table-column label="题目" min-width="400">
         <template slot-scope="scope">
           <router-link :to="'/problem/' + scope.row.pid">
@@ -45,7 +45,7 @@ export default {
             this.contest = contest
             let problemIds = []
             this.problems.forEach((item) => {
-              problemIds.push(item.pid)
+              problemIds.push(item.index)
             })
             EventBus.$emit(EventName.UpdateContestPIds, problemIds)
           })

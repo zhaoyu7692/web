@@ -4,12 +4,8 @@
     <Main class="oj-container"></Main>
     <Login></Login>
     <Register></Register>
-    <!--    <EditProblemPanel>-->
-
-    <!--    </EditProblemPanel>-->
     <EditProblemPanel></EditProblemPanel>
     <EditContestPanel></EditContestPanel>
-
   </div>
 </template>
 
@@ -17,8 +13,8 @@
 import Main from '@/components/Main'
 // import NavBar from '@/components/NavBar'
 import EventBus from "@/utils/EventBus"
-import Login from '@/components/Login'
-import Register from "@/components/Register";
+import Login from '@/components/User/Login'
+import Register from "@/components/User/Register";
 import EditProblemPanel from "@/components/Edit/EditProblemPanel";
 import EditContestPanel from "@/components/Edit/EditContestPanel";
 

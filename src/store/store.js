@@ -15,5 +15,10 @@ export default new Vuex.Store({
       window.sessionStorage.setItem("id", user.id);
       state.user = user
     }
+  },
+  getters: {
+    isAdmin(state) {
+      return state.user !== null && state.user.user_type === 1;
+    }
   }
 })

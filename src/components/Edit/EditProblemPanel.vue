@@ -178,7 +178,7 @@ export default {
       callback()
     }
     return {
-      visible: true,
+      visible: false,
       problem: {
         title: '',
         description: '',
@@ -321,8 +321,11 @@ export default {
     },
   },
   created() {
-    EventBus.$on(EventName.ChangeEditProblemVisible, (visible) => {
+    EventBus.$on(EventName.ChangeEditProblemVisible, (visible, scope) => {
       this.visible = visible
+      if (scope != null) {
+        console.log('edit')
+      }
     })
   }
 }

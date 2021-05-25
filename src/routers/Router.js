@@ -10,12 +10,14 @@ VueRouter.prototype.push = function push(location) {
 Vue.use(VueRouter)
 import Main from "@/components/Main"
 import Home from "@/components/Home";
-import Problems from "@/components/Problems";
-import SubmitStatus from "@/components/SubmitStatus";
-import Problem from "@/components/Problem";
-import Contest from "@/components/Contest";
-import Contests from "@/components/Contests";
-import ContestStatus from "@/components/ContestStatus";
+import Problems from "@/components/Problem/Problems";
+import SubmitStatus from "@/components/Problem/SubmitStatus";
+import Problem from "@/components/Problem/Problem";
+import Contest from "@/components/Contest/Contest";
+import Contests from "@/components/Contest/Contests";
+import ContestStatus from "@/components/Contest/ContestStatus";
+import ContestManager from "@/components/Edit/ContestManager";
+import ProblemManager from "@/components/Edit/ProblemManager";
 
 const routes = [
   {
@@ -57,6 +59,14 @@ const routes = [
   {
     path: '/contestStatus/:cid',
     component: ContestStatus,
+  },
+  {
+    path: '/contestManager',
+    component: ContestManager,
+  },
+  {
+    path: '/problemManager',
+    component: ProblemManager,
   },
   {
     path: '*',

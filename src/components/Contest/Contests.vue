@@ -19,14 +19,14 @@
           <div>{{ formatDuration(scope) }}</div>
         </template>
       </el-table-column>
-      <el-table-column prop="register_count" label="报名人数" min-width="100" align="center"></el-table-column>
-      <el-table-column min-width="80" label="操作" align="center">
-        <template>
-          <div>
-            <el-link type="primary">参赛</el-link>
-          </div>
-        </template>
-      </el-table-column>
+<!--      <el-table-column prop="register_count" label="报名人数" min-width="100" align="center"></el-table-column>-->
+<!--      <el-table-column min-width="80" label="操作" align="center">-->
+<!--        <template>-->
+<!--          <div>-->
+<!--            <el-link type="primary">参赛</el-link>-->
+<!--          </div>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
     </el-table>
     <el-pagination
         @current-change="pageChanged"

@@ -61,11 +61,11 @@
         <i class="el-icon-menu"></i>
         <span slot="title">{{ contest.title + '榜单' }}</span>
       </el-menu-item>
-      <el-menu-item v-show="$store.state.user" index="/createProblem">
+      <el-menu-item v-show="this.$store.getters.isAdmin" index="/problemManager">
         <i class="el-icon-menu"></i>
         <span>创建题目</span>
       </el-menu-item>
-      <el-menu-item v-show="$store.state.user" index="/createContest">
+      <el-menu-item v-show="this.$store.getters.isAdmin" index="/contestManager">
         <i class="el-icon-menu"></i>
         <span>创建比赛</span>
       </el-menu-item>
@@ -98,8 +98,8 @@ export default {
         '/contest',
         '/contestStatus',
         '/profile',
-        '/createProblem',
-        '/createContest',
+        '/problemManager',
+        '/contestManager',
       ],
       problemIds: [],
       currentTab: '/index',
@@ -140,14 +140,6 @@ export default {
       switch (this.currentTab) {
         case '/profile': {
           this.loginOrRegister()
-          break
-        }
-        case '/createProblem': {
-          EventBus.$emit(EventName.ChangeEditProblemVisible, true)
-          break
-        }
-        case '/createContest': {
-          EventBus.$emit(EventName.ChangeEditContestVisible, true)
           break
         }
         case '/submitStatus':

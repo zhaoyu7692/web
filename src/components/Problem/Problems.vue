@@ -23,7 +23,7 @@
       </el-table-column>
     </el-table>
     <el-pagination
-        v-if="false"
+        v-if="true"
         @current-change="pageChanged"
         :current-page="1"
         :page-size="problems.size"
