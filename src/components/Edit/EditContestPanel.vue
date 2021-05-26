@@ -1,26 +1,16 @@
 <template>
   <el-dialog
-      title=" 编辑比赛"
+      :title="edit?'编辑比赛':'创建比赛'"
       :visible.sync="visible"
       width="70%"
       model-value style="min-width: 1120px">
-    <el-form ref="form" :model="contest" label-width="80px">
-      <el-form-item
-          label="比赛标题"
-          prop="title"
-          :rules="[
-              {required : true, message: '请输入比赛标题', trigger: 'blur'}
-          ]"
-      >
+    <el-form ref="editContestForm" :model="contest" label-width="80px">
+      <el-form-item label="比赛标题" prop="title" :rules="[{required : true, message: '请输入比赛标题', trigger: 'blur'}]">
         <el-input v-model="contest.title"></el-input>
       </el-form-item>
       <el-form-item label="比赛时间" prop="time" :rules="[{required: true, message: '请选择比赛时间'}]">
-        <el-date-picker
-            v-model="contest.time"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期">
+        <el-date-picker v-model="contest.time" type="datetimerange" range-separator="至" start-placeholder="开始日期"
+                        end-placeholder="结束日期">
         </el-date-picker>
       </el-form-item>
 
@@ -72,8 +62,8 @@
       <el-button @click="addProblem" type="success" icon="el-icon-plus"
                  style="width: 60px; margin: 0 10px; padding: 5px"></el-button>
       <div style="text-align: center">
-        <el-button type="primary" @click="editContest">立即创建</el-button>
-        <el-button>取消</el-button>
+        <el-button type="primary" @click="editContest">{{ edit ? '立即编辑' : '立即创建' }}</el-button>
+        <el-button @click="visible = false">取消</el-button>
       </div>
     </el-form>
   </el-dialog>
@@ -100,7 +90,9 @@ export default {
     return {
       problem_status,
       problem_status_color,
+      edit: false,
       contest: {
+        cid: -1,
         title: '',
         time: [],
         problems: [{
@@ -114,13 +106,14 @@ export default {
   },
   methods: {
     editContest() {
-      this.$refs.form.validate((valid) => {
+      this.$refs.editContestForm.validate((valid) => {
         console.log(this.contest)
         if (!valid) {
           return
         }
         if (this.contest.problems.length === 0) {
           this.$message({type: 'error', message: '比赛题目数为0'})
+          return
         }
         let problems = []
         for (let i = 0; i < this.contest.problems.length; i++) {
@@ -134,20 +127,44 @@ export default {
           })
         }
         console.log(problems)
-        this.$http.post('/createContest/', {
-          title: this.contest.title,
-          start_time: this.contest.time[0],
-          duration: this.contest.time[1].getTime() - this.contest.time[0].getTime(),
-          problems
-        }).then(() => {
-          this.$message({type: 'success', message: '比赛创建成功'})
-          //TODO: 添加重定向
-        }).catch(errorCode => {
-          if (errorCode !== -1) {
-            this.$message({type: 'error', message: '比赛配置失败'})
-          }
-        })
-
+        if (this.edit) {
+          console.log('edit')
+          console.log(this.contest.time)
+          this.$http.post('/updateContest/', {
+            cid: this.contest.cid,
+            title: this.contest.title,
+            start_time: this.contest.time[0],
+            duration: (this.contest.time[1].getTime() - this.contest.time[0].getTime()) / 1000,
+            problems,
+            user: this.$store.state.user
+          }).then(() => {
+            this.visible = false
+            this.$message({type: 'success', message: '比赛修改成功'})
+            EventBus.$emit(EventName.RefreshContestManager, -1)
+            //TODO: 添加重定向
+          }).catch(errorCode => {
+            if (errorCode !== -1) {
+              this.$message({type: 'error', message: '比赛修改失败'})
+            }
+          })
+        } else {
+          this.$http.post('/createContest/', {
+            title: this.contest.title,
+            start_time: this.contest.time[0],
+            duration: (this.contest.time[1].getTime() - this.contest.time[0].getTime()) / 1000,
+            problems,
+            user: this.$store.state.user
+          }).then(() => {
+            this.visible = false
+            this.$message({type: 'success', message: '比赛创建成功'})
+            //TODO: 添加重定向
+            EventBus.$emit(EventName.RefreshContestManager, 1)
+          }).catch(errorCode => {
+            if (errorCode !== -1) {
+              this.$message({type: 'error', message: '比赛创建失败'})
+            }
+          })
+        }
       })
     },
     // 校验比赛题目
@@ -200,7 +217,34 @@ export default {
     }
   },
   created() {
-    EventBus.$on(EventName.ChangeEditContestVisible, (visible) => {
+    EventBus.$on(EventName.ChangeEditContestVisible, (visible, contest) => {
+      if (this.$refs.editContestForm !== undefined) {
+        this.$refs.editContestForm.resetFields()
+      }
+      this.contest.problems = [{
+        pid: '',
+        title: '',
+        status: 0,
+      }]
+      this.edit = contest !== null
+      if (contest !== null) {
+        console.log(contest)
+        this.$http.get('/getContest/', {params: {cid: contest.cid, user: this.$store.state.user}})
+            .then(({contest, problems}) => {
+              this.contest.cid = contest.cid
+              this.contest.title = contest.title
+              this.contest.time = [new Date(contest.begin_time), new Date(new Date(contest.begin_time).getTime() + contest.duration * 1000)]
+              for (let i = 0; i < problems.length; i++) {
+                problems[i].status = 2
+              }
+              this.contest.problems = problems
+              console.log(contest, problems)
+            }).catch(errCode => {
+          if (errCode !== -1) {
+            this.$message({type: 'error', message: '未知错误11'})
+          }
+        })
+      }
       this.visible = visible
     })
   },

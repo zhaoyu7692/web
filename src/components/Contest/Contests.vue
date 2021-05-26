@@ -14,7 +14,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="begin_time" label="开始时间" min-width="160" align="center"></el-table-column>
-      <el-table-column label="持续时长" min-width="80" align="center">
+      <el-table-column label="持续时长" min-width="100" align="center">
         <template slot-scope="scope">
           <div>{{ formatDuration(scope) }}</div>
         </template>
@@ -80,7 +80,7 @@ export default {
     },
     formatDuration(scope) {
       let duration = scope.row.duration
-      let formatDuration = ('0' + ((duration % (3600 * 24)) / 3600).toString()).slice(-2) + ':' + ('0' + (duration % 3600).toString()).slice(-2)
+      let formatDuration = ('0' + Math.floor((duration % (3600 * 24)) / 3600).toString()).slice(-2) + ':' + ('0' + Math.floor((duration % 3600) / 60).toString()).slice(-2)
       if (duration / (3600 * 24) > 0) {
         formatDuration = Math.floor(duration / (3600 * 24)) + ':' + formatDuration
       }

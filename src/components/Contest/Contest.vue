@@ -4,7 +4,7 @@
       <el-table-column prop="index" label="#" min-width="60"></el-table-column>
       <el-table-column label="题目" min-width="400">
         <template slot-scope="scope">
-          <router-link :to="'/problem/' + scope.row.pid">
+          <router-link :to="'/contest/'+ contest.cid + '/' + scope.row.index">
             <el-link>{{ scope.row.title }}</el-link>
           </router-link>
         </template>
@@ -29,7 +29,7 @@ export default {
   data() {
     return {
       problems: [],
-      contest:{},
+      contest: {},
     };
   },
   methods: {

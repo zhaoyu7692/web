@@ -63,11 +63,11 @@
       </el-menu-item>
       <el-menu-item v-show="this.$store.getters.isAdmin" index="/problemManager">
         <i class="el-icon-menu"></i>
-        <span>创建题目</span>
+        <span>题目管理</span>
       </el-menu-item>
       <el-menu-item v-show="this.$store.getters.isAdmin" index="/contestManager">
         <i class="el-icon-menu"></i>
-        <span>创建比赛</span>
+        <span>比赛管理</span>
       </el-menu-item>
       <el-menu-item index="/profile">
         <i class="el-icon-user-solid"></i>

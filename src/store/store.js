@@ -12,7 +12,7 @@ export default new Vuex.Store({
       //存用户信息
       window.sessionStorage.setItem("token", user.token);
       window.sessionStorage.setItem("username", user.username);
-      window.sessionStorage.setItem("id", user.id);
+      window.sessionStorage.setItem("uid", user.id);
       state.user = user
     }
   },

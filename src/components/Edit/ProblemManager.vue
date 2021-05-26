@@ -21,28 +21,29 @@
           <el-progress :percentage="acceptRate(scope)"></el-progress>
         </template>
       </el-table-column>
-      <el-table-column min-width="120" label="操作" align="center">
+      <el-table-column min-width="60" label="操作" align="center">
         <template slot-scope="scope">
-          <el-row>
-            <el-col :span="12">
-              <el-link type="primary" @click="editProblem(scope)">编辑</el-link>
-            </el-col>
-            <el-col :span="12">
-              <el-link type="primary" @click="deleteProblem(scope)">删除</el-link>
-            </el-col>
-          </el-row>
+          <el-link type="primary" @click="readyDeleteProblem(scope)">删除</el-link>
         </template>
       </el-table-column>
     </el-table>
+    <el-button type="primary" style="margin: 10px 15px" @click="createProblem">创建比赛</el-button>
     <el-pagination
         v-if="true"
         @current-change="pageChanged"
-        :current-page="1"
+        :current-page="current_page"
         :page-size="problems.size"
         layout="prev, pager, next"
         :total="problems.total"
         class="problem_pagination"
     ></el-pagination>
+    <el-dialog title="提示" :visible.sync="deleteVisible" width="30%">
+      <span>确定要删除题目吗？</span>
+      <span slot="footer" class="dialog-footer">
+      <el-button @click="deleteVisible = false">取 消</el-button>
+      <el-button type="primary" @click="deleteContest">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-main>
 </template>
 
@@ -54,6 +55,9 @@ export default {
   name: "ProblemManager",
   data() {
     return {
+      deleteVisible: false,
+      deletePid: -1,
+      current_page: 1,
       problems: {
         total: 0,
         size: 20,
@@ -70,11 +74,25 @@ export default {
     };
   },
   methods: {
-    editProblem(scope) {
-      EventBus.$emit(EventName.ChangeEditProblemVisible, true, {scope: scope.row.pid})
+    createProblem() {
+      EventBus.$emit(EventName.ChangeEditProblemVisible, true, null)
     },
-    deleteProblem(scope) {
-      console.log('删除题目', scope)
+    readyDeleteProblem(scope) {
+      this.deletePid = scope.row.pid
+      this.deleteVisible = true
+    },
+    deleteContest() {
+      this.deleteVisible = false
+      this.$http.post('/deleteProblem/', {pid: this.deletePid, user: this.$store.state.user})
+          .then(() => {
+            this.$message({type: 'success', message: '题目删除成功'})
+            this.pageChanged(this.current_page)
+          })
+          .catch(errCode => {
+            if (errCode !== -1) {
+              this.$message({type: 'error', message: '题目删除失败'})
+            }
+          })
     },
     acceptRate(scope) {
       if (scope.row.total === 0) return 0;
@@ -108,6 +126,9 @@ export default {
   computed: {},
   created() {
     this.pageChanged(1)
+    EventBus.$on(EventName.RefreshProblemManager, page => {
+      this.pageChanged(page > 0 ? page : this.current_page)
+    })
   }
 }
 </script>

@@ -9,6 +9,8 @@ export const EventName = {
   UpdateContestPIds: 'UpdateContestPIds',
   ChangeEditContestVisible: 'ChangeEditContestVisible',
   ChangeEditProblemVisible: 'ChangeEditProblemVisible',
+  RefreshContestManager: 'RefreshContestManager',
+  RefreshProblemManager: 'RefreshProblemManager',
 }
 
 export default new Vue();

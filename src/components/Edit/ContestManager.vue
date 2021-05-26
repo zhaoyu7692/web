@@ -9,7 +9,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="begin_time" label="开始时间" min-width="160" align="center"></el-table-column>
-      <el-table-column label="持续时长" min-width="80" align="center">
+      <el-table-column label="持续时长" min-width="100" align="center">
         <template slot-scope="scope">
           <div>{{ formatDuration(scope) }}</div>
         </template>
@@ -22,20 +22,28 @@
               <el-link type="primary" @click="editContest(scope)">编辑</el-link>
             </el-col>
             <el-col :span="12">
-              <el-link type="primary" @click="deleteContest(scope)">删除</el-link>
+              <el-link type="primary" @click="readyDeleteContest(scope)">删除</el-link>
             </el-col>
           </el-row>
         </template>
       </el-table-column>
     </el-table>
+    <el-button type="primary" style="margin: 10px 15px" @click="createContest">创建比赛</el-button>
     <el-pagination
         @current-change="pageChanged"
-        :current-page="1"
+        :current-page="current_page"
         :page-size="contests.size"
         layout="prev, pager, next"
         :total="contests.total"
         class="contests_pagination"
     ></el-pagination>
+    <el-dialog title="提示" :visible.sync="deleteVisible" width="30%">
+      <span>确定要删除比赛吗？</span>
+      <span slot="footer" class="dialog-footer">
+      <el-button @click="deleteVisible = false">取 消</el-button>
+      <el-button type="primary" @click="deleteContest">确 定</el-button>
+      </span>
+    </el-dialog>
   </el-main>
 </template>
 
@@ -46,6 +54,9 @@ export default {
   name: "ContestManager",
   data() {
     return {
+      deleteVisible: false,
+      deleteCid: -1,
+      current_page: 1,
       contests: {
         item_list: [
           {
@@ -62,11 +73,28 @@ export default {
     }
   },
   methods: {
-    editContest(scope) {
-      EventBus.$emit(EventName.ChangeEditContestVisible, true, {scope: scope})
+    createContest() {
+      EventBus.$emit(EventName.ChangeEditContestVisible, true, null)
     },
-    deleteContest(scope) {
+    editContest(scope) {
+      EventBus.$emit(EventName.ChangeEditContestVisible, true, scope.row)
+    },
+    readyDeleteContest(scope) {
+      this.deleteVisible = true
+      this.deleteCid = scope.row.cid
       console.log('delete contest', scope)
+    },
+    deleteContest() {
+      this.deleteVisible = false
+      this.$http.post('/deleteContest/', {cid: this.deleteCid, user:this.$store.state.user})
+          .then(() => {
+            this.$message({type: 'success', message: '比赛删除成功'})
+            this.pageChanged(this.current_page)
+          }).catch(errCode => {
+        if (errCode !== -1) {
+          this.$message({type: 'error', message: '比赛删除失败'})
+        }
+      })
     },
     jumpContest(scope) {
       EventBus.$emit(EventName.UpdateContest, scope.row)
@@ -85,7 +113,7 @@ export default {
     },
     formatDuration(scope) {
       let duration = scope.row.duration
-      let formatDuration = ('0' + ((duration % (3600 * 24)) / 3600).toString()).slice(-2) + ':' + ('0' + (duration % 3600).toString()).slice(-2)
+      let formatDuration = ('0' + Math.floor((duration % (3600 * 24)) / 3600).toString()).slice(-2) + ':' + ('0' + Math.floor((duration % 3600) / 60).toString()).slice(-2)
       if (duration / (3600 * 24) > 0) {
         formatDuration = Math.floor(duration / (3600 * 24)) + ':' + formatDuration
       }
@@ -119,6 +147,10 @@ export default {
   },
   created() {
     this.pageChanged(1)
+    EventBus.$on(EventName.RefreshContestManager, page => {
+      console.log(page)
+      this.pageChanged(page > 0 ? page : this.current_page)
+    })
   }
 }
 </script>

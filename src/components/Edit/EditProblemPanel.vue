@@ -4,7 +4,7 @@
       :visible.sync="visible"
       width="70%"
       model-value style="min-width: 1120px">
-    <el-form ref="form" label-width="80px" :rules="rules" :model="problem">
+    <el-form ref="editProblemForm" label-width="80px" :rules="rules" :model="problem">
       <el-form-item label="题目标题" prop="title">
         <el-input v-model="problem.title"></el-input>
       </el-form-item>
@@ -16,6 +16,9 @@
       </el-form-item>
       <el-form-item label="输出描述" prop="output">
         <el-input type="textarea" v-model="problem.output"></el-input>
+      </el-form-item>
+      <el-form-item label="题目来源" prop="output">
+        <el-input type="textarea" v-model="problem.source"></el-input>
       </el-form-item>
       <el-form-item label="测试用例" prop="samples">
         <el-row style="padding-bottom: 10px" v-for="(sample, index) in problem.samples" :key="index" type="flex"
@@ -87,7 +90,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">立即创建</el-button>
-        <el-button>取消</el-button>
+        <el-button @click="visible = false">取消</el-button>
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -178,12 +181,14 @@ export default {
       callback()
     }
     return {
+      edit: false,
       visible: false,
       problem: {
         title: '',
         description: '',
         input: '',
         output: '',
+        source: '',
         samples: [{
           input: '',
           output: '',
@@ -206,6 +211,51 @@ export default {
       }
     }
   },
+  created() {
+    EventBus.$on(EventName.ChangeEditProblemVisible, (visible, problem) => {
+      if (this.$refs.editProblemForm !== undefined) {
+        this.$refs.editProblemForm.resetFields()
+      }
+      this.edit = problem !== null
+      this.visible = visible
+      // if (problem != null) {
+      //   console.log(problem)
+      //   this.$http.get('/getProblem/', {params: {pid: problem.pid}})
+      //       .then(({problem, samples, testcases}) => {
+      //         console.log(problem, samples, testcases)
+      //         this.problem.title = problem.title
+      //         this.problem.description = problem.description
+      //         this.problem.input = problem.input
+      //         this.problem.output = problem.output
+      //         this.problem.samples = samples
+      //         this.problem.time_limit = problem.time_limit
+      //         this.problem.memory_limit = problem.memory_limit
+      //         this.problem.difficulty = difficulty[problem.difficulty]
+              // for (let i = 0; i < testcases.length; i++) {
+              //   console.log(new File(["foo"], testcases[i].filename, {
+              //     type: "text/plain",
+              //   }))
+              //   let file = new File(["foo"], testcases[i].filename)
+              //   if (testcases[i].filename.endsWith('.in')) {
+              //     this.problem.input_file_list.push(file)
+              //     this.inputFiles.push(file)
+              //   } else if (testcases[i].filename.endsWith('.out')) {
+              //     this.problem.output_file_list.push(file)
+              //     this.outputFiles.push(file)
+              //   }
+              // }
+              // this.problem.input_file_list = testcas
+      //       })
+      //       .catch(errCode => {
+      //         if (errCode !== -1) {
+      //           this.$message({type: 'error', message: '未知错误11'})
+      //         }
+      //       })
+      //
+      // }
+
+    })
+  },
   methods: {
     addSample() {
       this.problem.samples.push({
@@ -227,6 +277,7 @@ export default {
         this.$message({type: 'error', message: file.name + '文件拓展名不是 .in ~'})
         return false
       }
+      console.log(file)
       return true
     },
     beforeUploadOutput(file) {
@@ -258,7 +309,8 @@ export default {
       this.$http.post('/createProblem/', data)
           .then(({pid}) => {
             this.visible = false
-            this.$message({type: 'error', message: '题目创建成功，题目编号 ' + pid})
+            this.$message({type: 'success', message: '题目创建成功，题目编号 ' + pid})
+            EventBus.$emit(EventName.RefreshProblemManager, -1)
           })
           .catch(errorCode => {
             if (errorCode !== -1) {
@@ -267,7 +319,7 @@ export default {
           })
     },
     onSubmit() {
-      this.$refs.form.validate((valid) => {
+      this.$refs.editProblemForm.validate((valid) => {
         if (!valid) {
           return
         }
@@ -278,10 +330,12 @@ export default {
           input: formData.input,
           output: formData.output,
           samples: formData.samples,
+          source: formData.source,
           filename_list: [],
           time_limit: parseInt(formData.time_limit),
           memory_limit: parseInt(formData.memory_limit),
           difficulty: difficulty.indexOf(formData.difficulty),
+          user: this.$store.state.user
         }
 
         let totalCount = 0
@@ -320,14 +374,7 @@ export default {
 
     },
   },
-  created() {
-    EventBus.$on(EventName.ChangeEditProblemVisible, (visible, scope) => {
-      this.visible = visible
-      if (scope != null) {
-        console.log('edit')
-      }
-    })
-  }
+
 }
 </script>
 
