@@ -5,7 +5,11 @@
       <el-table-column prop="index" label="题目编号" min-width="12" align="center"></el-table-column>
       <el-table-column label="运行结果" min-width="16" align="center">
         <template slot-scope="scope">
-          <div :style="getStyle(scope)">{{ getStatus(scope) }}</div>
+          <el-link v-if="scope.row.compilation_message !== null && scope.row.compilation_message.length > 0"
+                   :style="getStyle(scope)" @click="showCompileMessage(scope.row.compilation_message)">
+            {{ getStatus(scope) }}
+          </el-link>
+          <div v-else :style="getStyle(scope)">{{ getStatus(scope) }}</div>
         </template>
       </el-table-column>
       <el-table-column label="运行时间" min-width="13" align="center">
@@ -40,6 +44,7 @@
 <script>
 
 import {languages} from "@/utils/common";
+import EventBus, {EventName} from "@/utils/EventBus";
 
 export default {
   name: "SubmitStatus",
@@ -54,12 +59,16 @@ export default {
           time_cost: 1234,
           memory_cost: 22222,
           status: 1,
+          compilation_message: '',
         }]
       },
     };
   },
   computed: {},
   methods: {
+    showCompileMessage(msg) {
+      EventBus.$emit(EventName.ChangeSubmitDetailVisible, true, msg)
+    },
     currentChange(page) {
       let params = {
         cid: this.$route.params.cid === undefined ? 0 : this.$route.params.cid,

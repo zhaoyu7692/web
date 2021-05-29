@@ -6,12 +6,13 @@
     <Register></Register>
     <EditProblemPanel></EditProblemPanel>
     <EditContestPanel></EditContestPanel>
+    <SubmitDetail></SubmitDetail>
   </div>
 </template>
 
 <script>
 import Main from '@/components/Main'
-// import NavBar from '@/components/NavBar'
+import SubmitDetail from "@/components/Problem/submitDetail"
 import EventBus from "@/utils/EventBus"
 import Login from '@/components/User/Login'
 import Register from "@/components/User/Register";
@@ -23,6 +24,7 @@ export default {
   components: {
     EditContestPanel,
     EditProblemPanel,
+    SubmitDetail,
     Main,
     Login,
     Register,

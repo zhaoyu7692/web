@@ -159,7 +159,7 @@ export default {
           })
     },
     initCodeEditor() {
-      this.codeModel = monaco.editor.createModel('', 'javascript')
+      this.codeModel = monaco.editor.createModel('', 'c')
       this.codeEditor = monaco.editor.create(document.getElementById('codeEditor'), {
         model: this.codeModel,
         automaticLayout: true,

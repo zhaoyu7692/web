@@ -11,6 +11,7 @@ export const EventName = {
   ChangeEditProblemVisible: 'ChangeEditProblemVisible',
   RefreshContestManager: 'RefreshContestManager',
   RefreshProblemManager: 'RefreshProblemManager',
+  ChangeSubmitDetailVisible: 'ChangeSubmitDetailVisible',
 }
 
 export default new Vue();
