@@ -57,6 +57,7 @@
 
 <script>
 import EventBus, {EventName} from "@/utils/EventBus";
+import {ResponseCode} from "@/network/network";
 
 export default {
   name: "Register",
@@ -70,8 +71,12 @@ export default {
     //检测用户名是否可用
     const checkUsernameUsed = (rule, value, callback) => {
       this.$http.post('/checkUsername/', {username: value})
-          .then(() => {
-            callback()
+          .then(({code, message}) => {
+            if (code === ResponseCode.UsernameUnavailable) {
+              callback(new Error(message))
+            } else {
+              callback()
+            }
           })
           .catch((errorCode) => {
             if (errorCode !== -1) {

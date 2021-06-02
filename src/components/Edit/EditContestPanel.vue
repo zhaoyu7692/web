@@ -30,7 +30,7 @@
             <el-input type="number" v-model="problem.pid" style="height: 26px" size="mini"
                       @blur="checkProblemAvailable(index)"
                       @change="problem.status = 0"></el-input>
-            <div class="sub-title">激活即列出输入建议</div>
+<!--            <div class="sub-title">激活即列出输入建议</div>-->
 <!--            <el-autocomplete-->
 <!--                class="inline-input"-->
 <!--                v-model="problem.pid"-->

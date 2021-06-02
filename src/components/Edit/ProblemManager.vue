@@ -27,7 +27,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-button type="primary" style="margin: 10px 15px" @click="createProblem">创建比赛</el-button>
+    <el-button type="primary" style="margin: 10px 15px" @click="createProblem">创建题目</el-button>
     <el-pagination
         v-if="true"
         @current-change="pageChanged"

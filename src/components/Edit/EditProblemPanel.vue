@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-      title=" 编辑题目"
+      :title="edit ? '编辑题目' : '创建题目'"
       :visible.sync="visible"
       width="70%"
       model-value style="min-width: 1120px">

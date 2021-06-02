@@ -6,8 +6,8 @@ export const ResponseCode =
   {
     UnknownFail: 0,
     Success: 1,
-    JumpLogin: 2
-
+    JumpLogin: 2,
+    UsernameUnavailable: 3,
   };
 
 axios.defaults.baseURL = '/api'
@@ -27,9 +27,13 @@ axios.interceptors.response.use(response => {
       Vue.prototype.$message({type: 'error', message: data.message === undefined ? '未知错误，稍后重试！' : data.message})
       break
     }
+    case ResponseCode.UsernameUnavailable: {
+      return data
+    }
   }
   switch (data.code) {
-    case ResponseCode.Success: {
+    case ResponseCode.Success:
+    case ResponseCode.UsernameUnavailable: {
       break
     }
     case ResponseCode.JumpLogin:
