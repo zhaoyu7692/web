@@ -21,9 +21,14 @@
           <el-progress :percentage="acceptRate(scope)"></el-progress>
         </template>
       </el-table-column>
-      <el-table-column min-width="60" label="操作" align="center">
+      <el-table-column min-width="120" label="操作" align="center">
         <template slot-scope="scope">
-          <el-link type="primary" @click="readyDeleteProblem(scope)">删除</el-link>
+          <el-col :span="12">
+            <el-link type="primary" @click="editProblem(scope)">编辑</el-link>
+          </el-col>
+          <el-col :span="12">
+            <el-link type="primary" @click="readyDeleteProblem(scope)">删除</el-link>
+          </el-col>
         </template>
       </el-table-column>
     </el-table>
@@ -80,6 +85,9 @@ export default {
     readyDeleteProblem(scope) {
       this.deletePid = scope.row.pid
       this.deleteVisible = true
+    },
+    editProblem(scope) {
+      EventBus.$emit(EventName.ChangeEditProblemVisible, true, scope.row)
     },
     deleteContest() {
       this.deleteVisible = false

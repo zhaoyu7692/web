@@ -19,10 +19,10 @@
         <template slot-scope="scope">
           <el-row>
             <el-col :span="12">
-              <el-link type="primary" @click="editContest(scope)">编辑</el-link>
+              <el-link type="primary" :disabled="contestStatus(scope)!==0" @click="editContest(scope)">编辑</el-link>
             </el-col>
             <el-col :span="12">
-              <el-link type="primary" @click="readyDeleteContest(scope)">删除</el-link>
+              <el-link type="primary" :disabled="contestStatus(scope)!==0" @click="readyDeleteContest(scope)">删除</el-link>
             </el-col>
           </el-row>
         </template>

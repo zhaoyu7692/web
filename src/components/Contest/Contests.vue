@@ -4,7 +4,7 @@
       <el-table-column prop="cid" label="#" min-width="60"></el-table-column>
       <el-table-column label="比赛名称" min-width="360">
         <template slot-scope="scope">
-          <el-link @click="jumpContest(scope)">{{ scope.row.title }}</el-link>
+          <el-link :disabled="contestStatus(scope) === 0" @click="jumpContest(scope)">{{ scope.row.title }}</el-link>
         </template>
       </el-table-column>
 

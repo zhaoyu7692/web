@@ -27,18 +27,18 @@ export default {
   data() {
     return {
       contest_rank: [
-        {
-          username: String,
-          accept_count: Number,
-          penalty: Number,
-          problem: [
-            {
-              index: Number,
-              try_count: Number,
-              accept_time: String
-            }
-          ]
-        },
+        // {
+        //   username: String,
+        //   accept_count: Number,
+        //   penalty: Number,
+        //   problem: [
+        //     {
+        //       index: Number,
+        //       try_count: Number,
+        //       accept_time: String
+        //     }
+        //   ]
+        // },
       ],
       contest: {
         indexes: Array,
