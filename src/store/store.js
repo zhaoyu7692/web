@@ -19,6 +19,12 @@ export default new Vuex.Store({
   getters: {
     isAdmin(state) {
       return state.user !== null && state.user.user_type === 1;
+    },
+    userId(state) {
+      if (state.user != null) {
+        return state.user.uid
+      }
+      return -1
     }
   }
 })

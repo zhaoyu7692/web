@@ -30,6 +30,14 @@
             <el-input type="number" v-model="problem.pid" style="height: 26px" size="mini"
                       @blur="checkProblemAvailable(index)"
                       @change="problem.status = 0"></el-input>
+<!--            <div class="sub-title">激活即列出输入建议</div>-->
+<!--            <el-autocomplete-->
+<!--                class="inline-input"-->
+<!--                v-model="problem.pid"-->
+<!--                :fetch-suggestions="querySearch"-->
+<!--                placeholder="请输入内容"-->
+<!--                @select="handleSelect"-->
+<!--            ></el-autocomplete>-->
           </el-col>
           <el-col :span="11" :offset="1" style="min-height: 1px">{{ problem.title }}</el-col>
           <el-col :span="2" style="text-align: center">

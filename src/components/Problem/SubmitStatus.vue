@@ -5,8 +5,8 @@
       <el-table-column prop="index" label="题目编号" min-width="12" align="center"></el-table-column>
       <el-table-column label="运行结果" min-width="16" align="center">
         <template slot-scope="scope">
-          <el-link v-if="scope.row.compilation_message !== null && scope.row.compilation_message.length > 0"
-                   :style="getStyle(scope)" @click="showCompileMessage(scope.row.compilation_message)">
+          <el-link v-if="$store.getters.userId === scope.row.uid"
+                   :style="getStyle(scope)" @click="showCompileMessage(scope)">
             {{ getStatus(scope) }}
           </el-link>
           <div v-else :style="getStyle(scope)">{{ getStatus(scope) }}</div>
@@ -54,20 +54,22 @@ export default {
       submitStatus: {
         total: 0,
         size: 20,
-        item_list: [{
-          rid: 1,
-          time_cost: 1234,
-          memory_cost: 22222,
-          status: 1,
-          compilation_message: '',
-        }]
+        item_list: [
+        //     {
+        //   rid: 1,
+        //   time_cost: 1234,
+        //   memory_cost: 22222,
+        //   status: 1,
+        //   compilation_message: '',
+        // }
+        ]
       },
     };
   },
   computed: {},
   methods: {
-    showCompileMessage(msg) {
-      EventBus.$emit(EventName.ChangeSubmitDetailVisible, true, msg)
+    showCompileMessage(scope) {
+      EventBus.$emit(EventName.ChangeSubmitDetailVisible, true, scope.row)
     },
     currentChange(page) {
       let params = {

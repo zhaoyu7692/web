@@ -36,7 +36,7 @@
       <div class="code-editor-header" style="margin-top: -72px">
         <span>编程语言：</span>
         <el-select @change="languageChanged" v-model="language" size="small" style="width: 120px">
-          <el-option v-for="(index, item) in languages" v-bind:key="item" v-bind:value="index"></el-option>
+          <el-option v-for="(index, item) in availableLanguage" v-bind:key="item" v-bind:value="index"></el-option>
         </el-select>
         <div style="float: right">
           <el-button size="small" @click="selectFile">
@@ -64,6 +64,7 @@ export default {
     return {
       language: 'C',
       languages: languages,
+      availableLanguage: ['C', 'C++', 'Java', 'Go'],
       codeEditor: null,
       codeModel: null,
       index: null,

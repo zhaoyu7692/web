@@ -54,19 +54,19 @@
         </ButtonPanel>
       </el-submenu>
       <el-menu-item v-show="contestVisible" index="/submitStatus">
-        <i class="el-icon-menu"></i>
+        <i class="el-icon-s-data"></i>
         <span slot="title">{{ contest.title + '提交状态' }}</span>
       </el-menu-item>
       <el-menu-item v-show="contestVisible" index="/contestStatus">
-        <i class="el-icon-menu"></i>
+        <i class="el-icon-s-data"></i>
         <span slot="title">{{ contest.title + '榜单' }}</span>
       </el-menu-item>
       <el-menu-item v-show="this.$store.getters.isAdmin" index="/problemManager">
-        <i class="el-icon-menu"></i>
+        <i class="el-icon-s-tools"></i>
         <span>题目管理</span>
       </el-menu-item>
       <el-menu-item v-show="this.$store.getters.isAdmin" index="/contestManager">
-        <i class="el-icon-menu"></i>
+        <i class="el-icon-s-tools"></i>
         <span>比赛管理</span>
       </el-menu-item>
       <el-menu-item index="/profile">

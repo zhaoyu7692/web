@@ -1,7 +1,8 @@
 <template>
   <el-dialog
-      title=" 编辑题目"
+      :title="edit ? '编辑题目' : '创建题目'"
       :visible.sync="visible"
+      :before-close="closeEditProblemPanel"
       width="70%"
       model-value style="min-width: 1120px">
     <el-form ref="editProblemForm" label-width="80px" :rules="rules" :model="problem">
@@ -17,7 +18,7 @@
       <el-form-item label="输出描述" prop="output">
         <el-input type="textarea" v-model="problem.output"></el-input>
       </el-form-item>
-      <el-form-item label="题目来源" prop="output">
+      <el-form-item label="题目来源" prop="source">
         <el-input type="textarea" v-model="problem.source"></el-input>
       </el-form-item>
       <el-form-item label="测试用例" prop="samples">
@@ -51,6 +52,8 @@
                 :before-upload="beforeUploadInput"
                 :on-success="uploadSuccess"
                 :on-error="uploadError"
+                :on-remove="removeInput"
+                :file-list="existed_input_file_list"
                 multiple
             >
               <el-button size="small" type="primary">点击选择输入文件</el-button>
@@ -64,6 +67,8 @@
                 :before-upload="beforeUploadOutput"
                 :on-success="uploadSuccess"
                 :on-error="uploadError"
+                :on-remove="removeOutput"
+                :file-list="existed_output_file_list"
                 multiple
                 ref="upload"
             >
@@ -88,10 +93,10 @@
           <el-radio label="困难"></el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">立即创建</el-button>
-        <el-button @click="visible = false">取消</el-button>
-      </el-form-item>
+      <div style="text-align: center">
+        <el-button type="primary" @click="onSubmit">{{ edit ? '立即修改' : '立即创建' }}</el-button>
+        <el-button @click="closeEditProblemPanel">取消</el-button>
+      </div>
     </el-form>
   </el-dialog>
 </template>
@@ -182,6 +187,7 @@ export default {
     }
     return {
       edit: false,
+      pid: -1,
       visible: false,
       problem: {
         title: '',
@@ -199,64 +205,76 @@ export default {
         memory_limit: 65536,
         difficulty: '简单',
       },
+      existed_input_file_list: [],
+      existed_output_file_list: [],
       rules: {
-        title: [{validator: validateTitle, trigger: 'blur'}],
-        description: [{validator: validateDescription, trigger: 'blur'}],
-        input: [{validator: validateInput, trigger: 'blur'}],
-        output: [{validator: validateOutput, trigger: 'blur'}],
-        samples: [{validator: validateSamples, trigger: 'blur'}],
-        input_file_list: [{validator: validateTestCase, trigger: 'blur'}],
-        time_limit: [{validator: validateTimeLimit, trigger: 'change'}],
-        memory_limit: [{validator: validateMemoryLimit, trigger: 'change'}],
+        title: [{required: true, trigger: 'blur'}, {validator: validateTitle, trigger: 'blur'}],
+        description: [{required: true, trigger: 'blur'}, {validator: validateDescription, trigger: 'blur'}],
+        input: [{required: true, trigger: 'blur'}, {validator: validateInput, trigger: 'blur'}],
+        output: [{required: true, trigger: 'blur'}, {validator: validateOutput, trigger: 'blur'}],
+        samples: [{required: true, trigger: 'blur'}, {validator: validateSamples, trigger: 'blur'}],
+        input_file_list: [{required: true, trigger: 'blur'}, {validator: validateTestCase, trigger: 'blur'}],
+        time_limit: [{required: true, trigger: 'blur'}, {validator: validateTimeLimit, trigger: 'change'}],
+        memory_limit: [{required: true, trigger: 'blur'}, {validator: validateMemoryLimit, trigger: 'change'}],
       }
     }
   },
   created() {
     EventBus.$on(EventName.ChangeEditProblemVisible, (visible, problem) => {
+      this.existed_output_file_list = []
+      this.existed_input_file_list = []
       if (this.$refs.editProblemForm !== undefined) {
         this.$refs.editProblemForm.resetFields()
       }
       this.edit = problem !== null
       this.visible = visible
-      // if (problem != null) {
-      //   console.log(problem)
-      //   this.$http.get('/getProblem/', {params: {pid: problem.pid}})
-      //       .then(({problem, samples, testcases}) => {
-      //         console.log(problem, samples, testcases)
-      //         this.problem.title = problem.title
-      //         this.problem.description = problem.description
-      //         this.problem.input = problem.input
-      //         this.problem.output = problem.output
-      //         this.problem.samples = samples
-      //         this.problem.time_limit = problem.time_limit
-      //         this.problem.memory_limit = problem.memory_limit
-      //         this.problem.difficulty = difficulty[problem.difficulty]
-              // for (let i = 0; i < testcases.length; i++) {
-              //   console.log(new File(["foo"], testcases[i].filename, {
-              //     type: "text/plain",
-              //   }))
-              //   let file = new File(["foo"], testcases[i].filename)
-              //   if (testcases[i].filename.endsWith('.in')) {
-              //     this.problem.input_file_list.push(file)
-              //     this.inputFiles.push(file)
-              //   } else if (testcases[i].filename.endsWith('.out')) {
-              //     this.problem.output_file_list.push(file)
-              //     this.outputFiles.push(file)
-              //   }
-              // }
-              // this.problem.input_file_list = testcas
-      //       })
-      //       .catch(errCode => {
-      //         if (errCode !== -1) {
-      //           this.$message({type: 'error', message: '未知错误11'})
-      //         }
-      //       })
-      //
-      // }
-
+      if (problem != null) {
+        console.log(problem)
+        this.pid = problem.pid
+        this.$http.get('/getProblem/', {params: {pid: problem.pid}})
+            .then(({problem, samples, testcases}) => {
+              console.log(problem, samples, testcases)
+              this.problem.title = problem.title
+              this.problem.description = problem.description
+              this.problem.input = problem.input
+              this.problem.output = problem.output
+              this.problem.source = problem.source
+              this.problem.samples = samples
+              this.problem.time_limit = problem.time_limit
+              this.problem.memory_limit = problem.memory_limit
+              this.problem.difficulty = difficulty[problem.difficulty]
+              for (let i = 0; i < testcases.length; i++) {
+                console.log(testcases[i])
+                let file = {
+                  name: testcases[i].filename,
+                  key: testcases[i].key,
+                }
+                if (testcases[i].filename.endsWith('.in')) {
+                  this.existed_input_file_list.push(file)
+                } else if (testcases[i].filename.endsWith('.out')) {
+                  this.existed_output_file_list.push(file)
+                }
+              }
+              this.problem.input_file_list = this.existed_input_file_list
+              this.problem.output_file_list = this.existed_output_file_list
+            })
+            .catch(errCode => {
+              if (errCode !== -1) {
+                this.$message({type: 'error', message: '未知错误11'})
+              }
+            })
+      }
     })
   },
   methods: {
+    closeEditProblemPanel() {
+      this.existed_input_file_list = []
+      this.existed_output_file_list = []
+      this.problem.input_file_list = []
+      this.problem.output_file_list = []
+      this.pid = -1
+      this.visible = false
+    },
     addSample() {
       this.problem.samples.push({
         input: '',
@@ -265,6 +283,12 @@ export default {
     },
     deleteSample(index) {
       this.samples.splice(index, 1)
+    },
+    removeInput(file, fileList) {
+      this.problem.input_file_list = fileList
+    },
+    removeOutput(file, fileList) {
+      this.problem.output_file_list = fileList
     },
     beforeUploadInput(file) {
       for (let i = 0; i < this.problem.input_file_list.length - 1; i++) {
@@ -278,6 +302,12 @@ export default {
         return false
       }
       console.log(file)
+      let reader = new FileReader();
+      reader.readAsBinaryString(file);
+      reader.onload = () => {
+        file.key = sha256(reader.result)
+        this.$message({type: 'success', message: file.name + '的 hash 值计算完成 ' + file.key})
+      };
       return true
     },
     beforeUploadOutput(file) {
@@ -291,6 +321,13 @@ export default {
         this.$message({type: 'error', message: file.name + '文件拓展名不是 .out ~'})
         return false
       }
+      console.log(file)
+      let reader = new FileReader();
+      reader.readAsBinaryString(file);
+      reader.onload = () => {
+        file.key = sha256(reader.result)
+        this.$message({type: 'success', message: file.name + '的 hash 值计算完成 ' + file.key})
+      };
       return true
     },
     uploadSuccess(response, file) {
@@ -300,29 +337,38 @@ export default {
       this.$message({type: 'error', message: file.name + "上传失败!"})
     },
     inputFileChange(file, fileList) {
-      this.problem.input_file_list = fileList;
+      this.problem.input_file_list = fileList
     },
     outputFileChange(file, fileList) {
       this.problem.output_file_list = fileList
     },
-    Submit(data) {
-      this.$http.post('/createProblem/', data)
-          .then(({pid}) => {
-            this.visible = false
-            this.$message({type: 'success', message: '题目创建成功，题目编号 ' + pid})
-            EventBus.$emit(EventName.RefreshProblemManager, -1)
-          })
-          .catch(errorCode => {
-            if (errorCode !== -1) {
-              this.$message({type: 'error', message: '题目创建失败'})
-            }
-          })
+    checkFileReady(file_list, filenames) {
+      for (let i = 0; i < file_list.length; i++) {
+        let value = file_list[i]
+        if (value.raw !== undefined && value.raw.key !== undefined) {
+          value.key = value.raw.key
+        }
+        if (value.key === undefined || value.key === null || value.status !== 'success') {
+          this.$message({type: 'info', message: '请重新上传' + value.name})
+          return false
+        }
+        filenames.push({
+          key: value.key,
+          name: value.name
+        })
+      }
+      return true
     },
     onSubmit() {
       this.$refs.editProblemForm.validate((valid) => {
         if (!valid) {
           return
         }
+        let filenames = []
+        if (!this.checkFileReady(this.problem.input_file_list, filenames) || !this.checkFileReady(this.problem.output_file_list, filenames)) {
+          return;
+        }
+        console.log(this.problem.input_file_list, this.problem.output_file_list)
         let formData = this.problem
         let data = {
           title: formData.title,
@@ -331,47 +377,40 @@ export default {
           output: formData.output,
           samples: formData.samples,
           source: formData.source,
-          filename_list: [],
+          filename_list: filenames,
           time_limit: parseInt(formData.time_limit),
           memory_limit: parseInt(formData.memory_limit),
           difficulty: difficulty.indexOf(formData.difficulty),
           user: this.$store.state.user
         }
-
-        let totalCount = 0
-        this.problem.input_file_list.forEach(value => {
-          totalCount++
-          this.$message({type: 'info', message: '正在计算' + value.name + '的 hash 值'})
-          let reader = new FileReader();
-          reader.readAsBinaryString(value.raw);
-          reader.onload = () => {
-            data.filename_list.push(sha256(reader.result))
-            this.$message({type: 'success', message: value.name + '的 hash 值计算完成'})
-            if (data.filename_list.length === totalCount) {
-              console.log('submit now')
-              console.log(data)
-              this.Submit(data)
-            }
-          };
-        })
-
-        this.problem.output_file_list.forEach(value => {
-          totalCount++
-          this.$message({type: 'info', message: '正在计算' + value.name + '的 hash 值'})
-          let reader = new FileReader();
-          reader.readAsBinaryString(value.raw);
-          reader.onload = () => {
-            data.filename_list.push(sha256(reader.result))
-            this.$message({type: 'success', message: value.name + '的 hash 值计算完成'})
-            if (data.filename_list.length === totalCount) {
-              console.log('submit now')
-              console.log(data)
-              this.Submit(data)
-            }
-          };
-        })
+        console.log(data)
+        if (this.edit) {
+          data.pid = this.pid
+          this.$http.post('/updateProblem/', data)
+              .then(() => {
+                this.closeEditProblemPanel()
+                this.$message({type: 'success', message: '题目修改成功'})
+                EventBus.$emit(EventName.RefreshProblemManager, -1)
+              })
+              .catch(errorCode => {
+                if (errorCode !== -1) {
+                  this.$message({type: 'error', message: '题目修改失败'})
+                }
+              })
+        } else {
+          this.$http.post('/createProblem/', data)
+              .then(({pid}) => {
+                this.visible = false
+                this.$message({type: 'success', message: '题目创建成功，题目编号 ' + pid})
+                EventBus.$emit(EventName.RefreshProblemManager, -1)
+              })
+              .catch(errorCode => {
+                if (errorCode !== -1) {
+                  this.$message({type: 'error', message: '题目创建失败'})
+                }
+              })
+        }
       })
-
     },
   },
 

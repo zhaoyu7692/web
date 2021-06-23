@@ -1,12 +1,16 @@
 <template>
   <el-dialog
-      title="编译信息"
       :visible.sync="visible"
       width="70%"
-      model-value style="min-width: 1120px">
-    <el-input type="textarea" readonly resize="none" v-model="compilation_message" autosize>
+      model-value style="min-width: 1120px;">
+    <div style="margin-top: -20px">
+      <h1>提交代码</h1>
+      <el-input type="textarea" readonly resize="none" v-model="source_code" autosize></el-input>
+      <h1 v-if="compilation_message.length > 0">编译信息</h1>
+      <el-input v-if="compilation_message.length > 0" type="textarea" readonly resize="none" v-model="compilation_message" autosize>
+      </el-input>
+    </div>
 
-    </el-input>
     <!--    <el-form ref="editProblemForm" label-width="80px" :rules="rules" :model="problem">-->
     <!--      <el-form-item label="题目标题" prop="title">-->
     <!--        <el-input v-model="problem.title"></el-input>-->
@@ -102,14 +106,26 @@ export default {
   name: "submitDetail",
   data() {
     return {
-      visible: true,
+      visible: false,
       compilation_message: '',
+      source_code: '',
     }
   },
   created() {
-    EventBus.$on(EventName.ChangeSubmitDetailVisible, (visible, compilation_message) => {
-      this.compilation_message = compilation_message
+    EventBus.$on(EventName.ChangeSubmitDetailVisible, (visible, data) => {
+      this.compilation_message = ''
+      this.source_code = ''
       this.visible = visible
+      this.$http.post('/getSubmitDetail/', {uid: this.$store.state.user.uid, rid: data.rid})
+      .then(({source_code, compilation_message}) => {
+        this.source_code = source_code
+        this.compilation_message = compilation_message
+      })
+      .catch(errorCode => {
+        if (errorCode !== -1) {
+          this.$message({type:'error', message:''})
+        }
+      })
     })
   }
 }

@@ -2,7 +2,7 @@
   <el-main style="width: 90%; margin: 0 auto;">
     <el-table :data="problems.item_list" stripe>;
       <el-table-column prop="pid" label="#" min-width="60"></el-table-column>
-      <el-table-column label="题目" min-width="400">
+      <el-table-column label="题目" min-width="200">
         <template slot-scope="scope">
           <router-link :to="'/problem/' + scope.row.pid">
             <el-link>{{ scope.row.title }}</el-link>

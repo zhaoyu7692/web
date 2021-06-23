@@ -16,9 +16,20 @@ import * as echarts from 'echarts'
 export default {
   name: "Home",
   methods: {
-    drawSubmitChart() {
+    drawSubmitChart(data) {
       let chartDom = document.getElementById('submitChart');
       let myChart = echarts.init(chartDom);
+
+      let xAxisData = data.legend, series = [], legendData = []
+      for (let i = 0; i < data.items.length; i++) {
+        let item = data.items[i]
+        legendData.push(item.name)
+        series.push({
+          name: item.name,
+          type: 'line',
+          data: item.data,
+        })
+      }
       let option = {
         title: {
           text: '评测数据',
@@ -32,7 +43,7 @@ export default {
           trigger: 'axis'
         },
         legend: {
-          data: ['通过', '答案错误', '编译错误', '格式错误', '提交'],
+          data: legendData,
           x: 'center',
           y: 'bottom',
           padding: 32
@@ -50,46 +61,33 @@ export default {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          data: xAxisData
         },
         yAxis: [
           {
             type: 'value'
           }
         ],
-        series: [
-          {
-            name: '通过',
-            type: 'line',
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: '答案错误',
-            type: 'line',
-            data: [120, 252, 353, 487, 577, 807, 1017]
-          },
-          {
-            name: '编译错误',
-            type: 'line',
-            data: [150, 232, 201, 154, 190, 330, 410]
-          },
-          {
-            name: '格式错误',
-            type: 'line',
-            data: [150, 382, 583, 737, 927, 1257, 1667]
-          },
-          {
-            name: '提交',
-            type: 'line',
-            data: [150, 382, 583, 737, 927, 1257, 1667]
-          }
-        ]
+        series: series
       };
+      console.log(option)
       myChart.setOption(option);
     },
-    drawActivityChart() {
+    drawActivityChart(data) {
+      console.log(data)
       let chartDom = document.getElementById('activeChart');
       let myChart = echarts.init(chartDom);
+
+      let xAxisData = data.legend, series = [], legendData = []
+      for (let i = 0; i < data.items.length; i++) {
+        let item = data.items[i]
+        legendData.push(item.name)
+        series.push({
+          name: item.name,
+          type: 'line',
+          data: item.data,
+        })
+      }
       let option = {
         title: {
           text: '活跃数据',
@@ -103,7 +101,7 @@ export default {
           trigger: 'axis'
         },
         legend: {
-          data: ['访问', '累计访问', '新增用户', '累计用户'],
+          data: legendData,
           x: 'center',
           y: 'bottom',
           padding: 32
@@ -121,7 +119,7 @@ export default {
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          data: xAxisData
         },
         yAxis: [
           {
@@ -131,39 +129,23 @@ export default {
             type: 'value'
           }
         ],
-        series: [
-          {
-            name: '访问',
-            type: 'line',
-            yAxisIndex: 0,
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: '累计访问',
-            type: 'line',
-            yAxisIndex: 1,
-            data: [120, 252, 353, 487, 577, 807, 1017]
-          },
-          {
-            name: '新增用户',
-            type: 'line',
-            yAxisIndex: 0,
-            data: [150, 232, 201, 154, 190, 330, 410]
-          },
-          {
-            name: '累计用户',
-            type: 'line',
-            yAxisIndex: 1,
-            data: [150, 382, 583, 737, 927, 1257, 1667]
-          },
-        ]
+        series: series
       };
+      console.log(option)
       myChart.setOption(option);
     }
   },
   mounted() {
-    this.drawActivityChart()
-    this.drawSubmitChart()
+    this.$http.get('/systemStatistics/')
+        .then(({activity_data, submit_data}) => {
+          this.drawActivityChart(activity_data)
+          this.drawSubmitChart(submit_data)
+        })
+        .catch(({errorCode}) => {
+          if (errorCode !== -1) {
+            this.$message.error('获取平台统计数据失败')
+          }
+        })
   }
 }
 </script>

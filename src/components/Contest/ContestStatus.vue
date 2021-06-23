@@ -27,18 +27,18 @@ export default {
   data() {
     return {
       contest_rank: [
-        {
-          username: String,
-          accept_count: Number,
-          penalty: Number,
-          problem: [
-            {
-              index: Number,
-              try_count: Number,
-              accept_time: String
-            }
-          ]
-        },
+        // {
+        //   username: String,
+        //   accept_count: Number,
+        //   penalty: Number,
+        //   problem: [
+        //     {
+        //       index: Number,
+        //       try_count: Number,
+        //       accept_time: String
+        //     }
+        //   ]
+        // },
       ],
       contest: {
         indexes: Array,
@@ -96,7 +96,9 @@ export default {
 .problem-style-undo, .problem-style-error, .problem-style-accept {
   font-size: 10px;
   line-height: 44px;
-  margin: 1px;
+  /*margin: 1px -10px 1px;*/
+  margin-left: -9px;
+  margin-right: -9px;
 }
 
 .problem-style-undo {

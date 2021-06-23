@@ -2,7 +2,7 @@
   <el-main style="width: 90%; margin: 0 auto;">
     <el-table :data="problems.item_list" stripe>;
       <el-table-column prop="pid" label="#" min-width="60"></el-table-column>
-      <el-table-column label="题目" min-width="400">
+      <el-table-column label="题目" min-width="200">
         <template slot-scope="scope">
           <router-link :to="'/problem/' + scope.row.pid">
             <el-link>{{ scope.row.title }}</el-link>
@@ -21,13 +21,18 @@
           <el-progress :percentage="acceptRate(scope)"></el-progress>
         </template>
       </el-table-column>
-      <el-table-column min-width="60" label="操作" align="center">
+      <el-table-column min-width="120" label="操作" align="center">
         <template slot-scope="scope">
-          <el-link type="primary" @click="readyDeleteProblem(scope)">删除</el-link>
+          <el-col :span="12">
+            <el-link type="primary" @click="editProblem(scope)">编辑</el-link>
+          </el-col>
+          <el-col :span="12">
+            <el-link type="primary" @click="readyDeleteProblem(scope)">删除</el-link>
+          </el-col>
         </template>
       </el-table-column>
     </el-table>
-    <el-button type="primary" style="margin: 10px 15px" @click="createProblem">创建比赛</el-button>
+    <el-button type="primary" style="margin: 10px 15px" @click="createProblem">创建题目</el-button>
     <el-pagination
         v-if="true"
         @current-change="pageChanged"
@@ -80,6 +85,9 @@ export default {
     readyDeleteProblem(scope) {
       this.deletePid = scope.row.pid
       this.deleteVisible = true
+    },
+    editProblem(scope) {
+      EventBus.$emit(EventName.ChangeEditProblemVisible, true, scope.row)
     },
     deleteContest() {
       this.deleteVisible = false

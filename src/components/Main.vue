@@ -67,6 +67,7 @@ export default {
   margin-left: 240px;
   height: 100%;
   transition: margin-left .5s;
+  overflow-y: scroll;
 }
 
 .oj-aside-in-recognize {

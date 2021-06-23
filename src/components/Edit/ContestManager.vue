@@ -2,7 +2,7 @@
   <el-main style="width: 90%; margin: 0 auto;">
     <el-table :data="contests.item_list" stripe>;
       <el-table-column prop="cid" label="#" min-width="60"></el-table-column>
-      <el-table-column prop="title" label="比赛名称" min-width="360"></el-table-column>
+      <el-table-column prop="title" label="比赛名称" min-width="200"></el-table-column>
       <el-table-column prop="status" label="状态" min-width="100" align="center">
         <template slot-scope="scope">
           <el-tag :type="contestStatusColor(scope)">{{ contestStatusText(scope) }}</el-tag>
@@ -19,10 +19,10 @@
         <template slot-scope="scope">
           <el-row>
             <el-col :span="12">
-              <el-link type="primary" @click="editContest(scope)">编辑</el-link>
+              <el-link type="primary" :disabled="contestStatus(scope)!==0" @click="editContest(scope)">编辑</el-link>
             </el-col>
             <el-col :span="12">
-              <el-link type="primary" @click="readyDeleteContest(scope)">删除</el-link>
+              <el-link type="primary" :disabled="contestStatus(scope)!==0" @click="readyDeleteContest(scope)">删除</el-link>
             </el-col>
           </el-row>
         </template>
