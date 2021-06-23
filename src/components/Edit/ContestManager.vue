@@ -2,7 +2,7 @@
   <el-main style="width: 90%; margin: 0 auto;">
     <el-table :data="contests.item_list" stripe>;
       <el-table-column prop="cid" label="#" min-width="60"></el-table-column>
-      <el-table-column prop="title" label="比赛名称" min-width="360"></el-table-column>
+      <el-table-column prop="title" label="比赛名称" min-width="200"></el-table-column>
       <el-table-column prop="status" label="状态" min-width="100" align="center">
         <template slot-scope="scope">
           <el-tag :type="contestStatusColor(scope)">{{ contestStatusText(scope) }}</el-tag>

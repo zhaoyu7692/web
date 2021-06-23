@@ -238,6 +238,7 @@ export default {
               this.problem.description = problem.description
               this.problem.input = problem.input
               this.problem.output = problem.output
+              this.problem.source = problem.source
               this.problem.samples = samples
               this.problem.time_limit = problem.time_limit
               this.problem.memory_limit = problem.memory_limit
